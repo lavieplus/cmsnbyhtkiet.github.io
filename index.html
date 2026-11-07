@@ -208,11 +208,13 @@ const SONG=[['G4',.75],['G4',.25],['A4',1],['G4',1],['C5',1],['B4',2],['G4',.75]
 function playSong(){if(!musicOn)return;let t=AC.currentTime+.1;const b=.52;
   for(const [n,d] of SONG){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=F[n];
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.5,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+d*b*.95);
-    o.connect(g);g.connect(master);o.start(t);o.stop(t+d*b);t+=d*b}
+    o.connect(g);g.connect(sg);o.start(t);o.stop(t+d*b);t+=d*b}
   timer=setTimeout(playSong,(t-AC.currentTime+1.5)*1000)}
+let sg;
 function setMusic(on){musicOn=on;$('#mu').classList.toggle('off',!on);clearTimeout(timer);
+  if(sg){const old=sg;sg=null;old.gain.cancelScheduledValues(AC.currentTime);old.gain.setTargetAtTime(0,AC.currentTime,.03);setTimeout(()=>old.disconnect(),250)}
   if(on){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.12;master.connect(AC.destination)}
-    AC.resume();playSong()}else if(master){master.gain.setTargetAtTime(0,AC.currentTime,.05);setTimeout(()=>master.gain.value=.12,300)}}
+    AC.resume();sg=AC.createGain();sg.connect(master);playSong()}}
 $('#mu').onclick=()=>setMusic(!musicOn);
 
 /* ---------- Cảnh ---------- */
